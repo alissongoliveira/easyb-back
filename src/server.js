@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const db = require("./config/db");
 
 const app = express();
 
@@ -9,8 +10,14 @@ app.use(cors());
 app.use(express.json());
 
 // Rota de teste
-app.get("/", (req, res) => {
-  res.send("API Easy Balance está rodando 🚀");
+app.get("/", async (req, res) => {
+  try {
+    const result = await db.query("SELECT NOW()");
+    res.send("API Easy Balance está rodando");
+  } catch (err) {
+    console.error("Erro na conexão com o banco:", err);
+    res.status(500).send("Erro na conexão com o banco");
+  }
 });
 
 // Inicialização
