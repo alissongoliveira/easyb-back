@@ -1,8 +1,44 @@
 const db = require("../config/db");
 
 module.exports = {
-  listar: async () => {
-    const result = await db.query("SELECT * FROM pesagens ORDER BY id DESC");
+  listar: async (filtros) => {
+    const params = [];
+    const condicoes = [];
+
+    if (filtros.cliente) {
+      params.push(`%${filtros.cliente}%`);
+      condicoes.push(`cliente ILIKE $${params.length}`);
+    }
+
+    if (filtros.motorista) {
+      params.push(`%${filtros.motorista}%`);
+      condicoes.push(`motorista ILIKE $${params.length}`);
+    }
+
+    if (filtros.placa) {
+      params.push(`%${filtros.placa}%`);
+      condicoes.push(`placa ILIKE $${params.length}`);
+    }
+
+    if (filtros.numero) {
+      params.push(`%${filtros.numero}%`);
+      condicoes.push(`numero ILIKE $${params.length}`);
+    }
+
+    if (filtros.dataInicial) {
+      params.push(filtros.dataInicial);
+      condicoes.push(`data >= $${params.length}`);
+    }
+
+    if (filtros.dataFinal) {
+      params.push(filtros.dataFinal);
+      condicoes.push(`data <= $${params.length}`);
+    }
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+    const sql = `SELECT * FROM pesagens ${where} ORDER BY id DESC`;
+
+    const result = await db.query(sql, params);
     return result.rows;
   },
 
