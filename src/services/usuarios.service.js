@@ -3,10 +3,27 @@ const bcrypt = require("bcrypt");
 
 module.exports = {
   // Listar Usuários
-  listar: async () => {
+  listar: async (filtros = {}) => {
+    const condicoes = [];
+    const params = [];
+
+    if (filtros.dataInicial) {
+      params.push(filtros.dataInicial);
+      condicoes.push(`criado_em >= $${params.length}`);
+    }
+
+    if (filtros.dataFinal) {
+      params.push(filtros.dataFinal);
+      condicoes.push(`criado_em <= $${params.length}`);
+    }
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+
     const result = await db.query(
-      "SELECT id, nome, usuario, criado_em, privilegios FROM usuarios"
+      `SELECT id, nome, usuario, criado_em, privilegios FROM usuarios ${where} ORDER BY criado_em DESC`,
+      params
     );
+
     return result.rows;
   },
 

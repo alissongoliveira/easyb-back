@@ -2,7 +2,11 @@ const usuarioService = require("../services/usuarios.service");
 
 module.exports = {
   listar: async (req, res) => {
-    const usuarios = await usuarioService.listar();
+    const filtros = {
+      dataInicial: req.query.dataInicial,
+      dataFinal: req.query.dataFinal,
+    };
+    const usuarios = await usuarioService.listar(filtros);
     res.json(usuarios);
   },
 
