@@ -1,11 +1,25 @@
 const db = require("../config/db");
 
 module.exports = {
-  listar: async (status = "Pendente") => {
-    const result = await db.query(
-      "SELECT * FROM complementos WHERE status = $1 ORDER BY id DESC",
-      [status]
-    );
+  listar: async (filtros = {}) => {
+    const condicoes = [];
+    const params = [];
+
+    if (filtros.dataInicial) {
+      params.push(`${filtros.dataInicial} 00:00:00`);
+      condicoes.push(`data >= $${params.length}`);
+    }
+
+    if (filtros.dataFinal) {
+      params.push(`${filtros.dataFinal} 23:59:59`);
+      condicoes.push(`data <= $${params.length}`);
+    }
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+
+    const query = `SELECT * FROM complementos ${where} ORDER BY id DESC`;
+
+    const result = await db.query(query, params);
     return result.rows;
   },
 
