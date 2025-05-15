@@ -7,6 +7,7 @@ const pesagensRoutes = require("./routes/pesagens.routes");
 const complementosRoutes = require("./routes/complementos.routes");
 const balancasConfigRoutes = require("./routes/balancasConfig.routes");
 const tabletsRoutes = require("./routes/tablets.routes");
+const iniciarLeituraDasBalancas = require("./tcp/balancaListener");
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use("/pesagens", pesagensRoutes);
 app.use("/complementos", complementosRoutes);
 app.use("/balancas-config", balancasConfigRoutes);
 app.use("/tablets", tabletsRoutes);
+
+// Inicialização da leitura das balanças
+iniciarLeituraDasBalancas();
 
 // Inicialização
 const PORT = process.env.PORT || 3000;
