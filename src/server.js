@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./config/db");
 const usuariosRoutes = require("./routes/usuarios.routes");
+const pesagensRoutes = require("./routes/pesagens.routes");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.get("/", async (req, res) => {
 
 // Rotas
 app.use("/usuarios", usuariosRoutes);
+app.use("/pesagens", pesagensRoutes);
 
 // Inicialização
 const PORT = process.env.PORT || 3000;
