@@ -48,8 +48,22 @@ module.exports = {
   },
 
   criar: async (dados) => {
+    const gerarNumeroPesagem = async () => {
+      const dataHoje = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const prefixo = `PES-${dataHoje}`;
+
+      const result = await db.query(
+        `SELECT COUNT(*) FROM pesagens WHERE data = CURRENT_DATE`
+      );
+      const countHoje = parseInt(result.rows[0].count) + 1;
+      const sequencial = countHoje.toString().padStart(3, "0");
+
+      return `${prefixo}-${sequencial}`;
+    };
+
+    const numero = await gerarNumeroPesagem();
+
     const {
-      numero,
       cliente,
       produto,
       motorista,
@@ -64,10 +78,10 @@ module.exports = {
 
     const result = await db.query(
       `INSERT INTO pesagens (
-        numero, cliente, produto, motorista, placa,
-        tara, liquido, bruto, observacoes, data, hora
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-      RETURNING *`,
+      numero, cliente, produto, motorista, placa,
+      tara, liquido, bruto, observacoes, data, hora
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+    RETURNING *`,
       [
         numero,
         cliente,
@@ -82,6 +96,7 @@ module.exports = {
         hora,
       ]
     );
+
     return result.rows[0];
   },
 };
