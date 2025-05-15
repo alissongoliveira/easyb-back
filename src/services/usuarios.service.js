@@ -23,7 +23,7 @@ module.exports = {
   criar: async (dados) => {
     const hash = await bcrypt.hash(dados.senha, 10);
     const result = await db.query(
-      "INSERT INTO usuarios (nome, usuario, senha, privilegios) VALUES ($1, $2, $3, $4) RETURNING id, nome, usuario",
+      "INSERT INTO usuarios (nome, usuario, senha, privilegios, criado_em) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, nome, usuario, criado_em",
       [dados.nome, dados.usuario, hash, dados.privilegios || []]
     );
     return result.rows[0];
