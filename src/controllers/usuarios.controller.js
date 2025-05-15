@@ -29,4 +29,20 @@ module.exports = {
     if (valido) res.json({ mensagem: "Login válido" });
     else res.status(401).json({ mensagem: "Credenciais inválidas" });
   },
+
+  atualizar: async (req, res) => {
+    try {
+      const atualizado = await usuarioService.atualizar(
+        req.params.id,
+        req.body
+      );
+      if (!atualizado) {
+        return res.status(404).json({ mensagem: "Usuário não encontrado" });
+      }
+      res.json(atualizado);
+    } catch (err) {
+      console.error("Erro ao atualizar usuário:", err);
+      res.status(500).json({ erro: "Erro ao atualizar usuário" });
+    }
+  },
 };

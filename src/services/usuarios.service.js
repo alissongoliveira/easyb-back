@@ -44,4 +44,45 @@ module.exports = {
     if (result.rowCount === 0) return false;
     return await bcrypt.compare(senha, result.rows[0].senha);
   },
+
+  // Atualizar Usuário
+  atualizar: async (id, dados) => {
+    const campos = [];
+    const valores = [];
+    let index = 1;
+
+    if (dados.nome) {
+      campos.push(`nome = $${index++}`);
+      valores.push(dados.nome);
+    }
+
+    if (dados.usuario) {
+      campos.push(`usuario = $${index++}`);
+      valores.push(dados.usuario);
+    }
+
+    if (dados.senha) {
+      const hash = await bcrypt.hash(dados.senha, 10);
+      campos.push(`senha = $${index++}`);
+      valores.push(hash);
+    }
+
+    if (dados.privilegios) {
+      campos.push(`privilegios = $${index++}`);
+      valores.push(dados.privilegios);
+    }
+
+    if (campos.length === 0) return null;
+
+    valores.push(id);
+    const query = `
+      UPDATE usuarios
+      SET ${campos.join(", ")}
+      WHERE id = $${index}
+      RETURNING id, nome, usuario, criado_em, privilegios
+    `;
+
+    const result = await db.query(query, valores);
+    return result.rows[0] || null;
+  },
 };
