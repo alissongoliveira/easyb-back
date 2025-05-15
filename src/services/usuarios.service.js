@@ -9,12 +9,12 @@ module.exports = {
 
     if (filtros.dataInicial) {
       params.push(filtros.dataInicial);
-      condicoes.push(`criado_em >= $${params.length}`);
+      condicoes.push(`criado_em::date >= $${params.length}`);
     }
 
     if (filtros.dataFinal) {
       params.push(filtros.dataFinal);
-      condicoes.push(`criado_em <= $${params.length}`);
+      condicoes.push(`criado_em::date <= $${params.length}`);
     }
 
     const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
