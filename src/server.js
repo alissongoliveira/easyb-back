@@ -6,6 +6,7 @@ const usuariosRoutes = require("./routes/usuarios.routes");
 const pesagensRoutes = require("./routes/pesagens.routes");
 const complementosRoutes = require("./routes/complementos.routes");
 const balancasConfigRoutes = require("./routes/balancasConfig.routes");
+const tabletsRoutes = require("./routes/tablets.routes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/usuarios", usuariosRoutes);
 app.use("/pesagens", pesagensRoutes);
 app.use("/complementos", complementosRoutes);
 app.use("/balancas-config", balancasConfigRoutes);
+app.use("/tablets", tabletsRoutes);
 
 // Inicialização
 const PORT = process.env.PORT || 3000;
