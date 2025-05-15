@@ -12,21 +12,21 @@ const tabletsRoutes = require("./routes/tablets.routes");
 const iniciarLeituraDasBalancas = require("./tcp/balancaListener");
 
 const app = express();
-
-// Middlewares globais
-app.use(cors());
-app.use(express.json());
-
-//
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
 // Compartilhar io com outros módulos
 app.set("io", io);
+
+// Middlewares globais
+app.use(cors());
+app.use(express.json());
 
 // Rota de teste
 app.get("/", async (req, res) => {
@@ -49,8 +49,8 @@ app.use("/tablets", tabletsRoutes);
 // Inicialização da leitura das balanças
 iniciarLeituraDasBalancas(io);
 
-// Inicialização
+// Inicialização correta com o servidor HTTP + socket.io
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
