@@ -1,4 +1,6 @@
 require("dotenv").config();
+const http = require("http");
+const { Server } = require("socket.io");
 const express = require("express");
 const cors = require("cors");
 const db = require("./config/db");
@@ -14,6 +16,17 @@ const app = express();
 // Middlewares globais
 app.use(cors());
 app.use(express.json());
+
+//
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+// Compartilhar io com outros módulos
+app.set("io", io);
 
 // Rota de teste
 app.get("/", async (req, res) => {
@@ -34,7 +47,7 @@ app.use("/balancas-config", balancasConfigRoutes);
 app.use("/tablets", tabletsRoutes);
 
 // Inicialização da leitura das balanças
-iniciarLeituraDasBalancas();
+iniciarLeituraDasBalancas(io);
 
 // Inicialização
 const PORT = process.env.PORT || 3000;

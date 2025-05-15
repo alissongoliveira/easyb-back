@@ -1,43 +1,59 @@
 const net = require("net");
 const db = require("../config/db");
 
-async function iniciarLeituraDasBalancas() {
+async function iniciarLeituraDasBalancas(io) {
   try {
     const { rows } = await db.query(
       "SELECT id, nome, ip, porta FROM balancas_config"
     );
 
+    if (rows.length === 0) {
+      console.warn("Nenhuma balança configurada no banco.");
+      return;
+    }
+
     rows.forEach((balanca) => {
       const porta = parseInt(balanca.porta, 10);
 
-      const server = net.createServer((socket) => {
-        console.log(`📡 Conectado à ${balanca.nome} (porta ${porta})`);
+      const socket = net.createConnection(
+        { host: balanca.ip, port: porta },
+        () => {
+          console.log(`Conectado à ${balanca.nome} em ${balanca.ip}:${porta}`);
+        }
+      );
 
-        socket.on("data", (data) => {
-          const mensagem = data.toString().trim();
-          console.log(`Dados recebidos da ${balanca.nome}:`, data.toString());
+      socket.on("data", (data) => {
+        const mensagem = data.toString().trim();
+        const peso = parsePeso(mensagem);
 
-          const peso = parsePeso(mensagem);
+        console.log(`Dado bruto recebido da ${balanca.nome}: "${mensagem}"`);
 
-          if (peso !== null) {
-            console.log(`Peso recebido da ${balanca.nome}: ${peso} kg`);
-            // Aqui irá emitir para o front
-          } else {
-            console.warn(`Peso inválido da ${balanca.nome}: "${mensagem}"`);
-          }
-        });
+        if (peso !== null) {
+          io.emit("peso-balanca", {
+            balanca: balanca.nome,
+            peso,
+          });
 
-        socket.on("end", () => {
-          console.log(`${balanca.nome} desconectada`);
-        });
-
-        socket.on("error", (err) => {
-          console.error(`Erro na ${balanca.nome}:`, err.message);
-        });
+          console.log(`
+╔═══════════════════════════════════════╗
+║ ⚖️  ${balanca.nome.padEnd(20)}            ║
+║ Peso recebido: ${peso.toString().padStart(6)} kg           ║
+╚═══════════════════════════════════════╝
+`);
+        } else {
+          console.warn(`Peso inválido da ${balanca.nome}: "${mensagem}"`);
+        }
       });
 
-      server.listen(porta, () => {
-        console.log(`Escutando ${balanca.nome} na porta ${porta}`);
+      socket.on("end", () => {
+        console.warn(`${balanca.nome} desconectou`);
+      });
+
+      socket.on("error", (err) => {
+        console.error(
+          `Erro na ${balanca.nome} (${balanca.ip}:${porta}):`,
+          err.message
+        );
       });
     });
   } catch (err) {
@@ -46,7 +62,7 @@ async function iniciarLeituraDasBalancas() {
 }
 
 function parsePeso(mensagem) {
-  const match = mensagem.match(/\+?0*(\d{1,7})/); // Ex: "+000012340kg"
+  const match = mensagem.match(/\+?0*(\d{1,7})/);
   return match ? parseInt(match[1]) : null;
 }
 
