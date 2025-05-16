@@ -35,10 +35,12 @@ module.exports = {
 
   finalizar: async (req, res) => {
     const sucesso = await service.finalizar(req.params.id, req.body);
-    if (sucesso) res.json({ mensagem: "Complemento finalizado" });
-    else
+    if (sucesso) {
+      res.json({ mensagem: "Complemento finalizado" });
+    } else {
       res.status(404).json({
         mensagem: "Solicitação não encontrada ou falha na finalização",
       });
+    }
   },
 };

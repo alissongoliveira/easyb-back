@@ -68,17 +68,18 @@ module.exports = {
   },
 
   finalizar: async (id, dados) => {
-    const { bruto_depois, tara, liquido } = dados;
+    const { bruto_depois, tara, liquido, operador } = dados;
 
     const result = await db.query(
       `UPDATE complementos SET
-        status = 'Finalizada',
-        bruto_depois = $1,
-        tara = $2,
-        liquido = $3,
-        hora_finalizacao = CURRENT_TIME
-      WHERE id = $4`,
-      [bruto_depois, tara, liquido, id]
+      status = 'Finalizada',
+      bruto_depois = $1,
+      tara = $2,
+      liquido = $3,
+      operador = $4,
+      hora_finalizacao = CURRENT_TIME
+    WHERE id = $5`,
+      [bruto_depois, tara, liquido, operador, id]
     );
 
     return result.rowCount > 0;
